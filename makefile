@@ -13,4 +13,4 @@ compile:
 	pip-compile requirements.in
 
 install:
-	pip install -r requirements.txt
+	pip-sync requirements.txt

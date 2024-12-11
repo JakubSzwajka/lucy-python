@@ -2,7 +2,6 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from enum import StrEnum
 from typing import List
-import yaml
 from dict2xml import dict2xml, DataSorter
 
 def dataclass_to_xml(instance) -> str:

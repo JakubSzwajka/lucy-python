@@ -1,6 +1,7 @@
 import os
 from langfuse import Langfuse
 
+
 class TracingService:
     def __init__(self):
         if not all(

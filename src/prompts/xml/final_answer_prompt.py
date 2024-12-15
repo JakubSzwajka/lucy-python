@@ -1,4 +1,3 @@
-
 from config import GlobalConfig
 from context import Context
 

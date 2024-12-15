@@ -3,10 +3,10 @@ format:
 	ruff format .
 
 chat: 
-	python src/cli/app.py
+	python src/main_cli.py
 
 serve:
-	python src/main.py
+	python src/main.py 
 
 
 compile:

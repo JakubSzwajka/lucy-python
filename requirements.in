@@ -7,3 +7,8 @@ uvicorn==0.32.1
 
 # more dev dependencies
 ruff==0.8.2
+
+
+langgraph 
+langsmith 
+langchain_anthropic

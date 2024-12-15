@@ -28,6 +28,7 @@ class PromptName(StrEnum):
     ACTION = "ACTION"
     FINAL_ANSWER = "FINAL_ANSWER"
 
+
 class Prompt:
     def __init__(self, name: PromptName, prompt: str):
         self.name = name
@@ -143,7 +144,10 @@ class MasterPrompt(Prompt):
         )
         super().__init__(PromptName.MASTER, content)
 
+
 class FinalAnswerPrompt(Prompt):
     def __init__(self, context: Context):
-        content = get_final_answer_prompt(context=context, current_datetime=self.current_datetime)
+        content = get_final_answer_prompt(
+            context=context, current_datetime=self.current_datetime
+        )
         super().__init__(PromptName.FINAL_ANSWER, content)

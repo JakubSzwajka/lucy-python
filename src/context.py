@@ -4,9 +4,18 @@ from enum import StrEnum
 from typing import List
 from dict2xml import dict2xml, DataSorter
 
+from event_bus import Event, EventBus
+from services.message_service import MessageService
+
+
 def dataclass_to_xml(instance) -> str:
-    # print('Instance name',instance.__class__.__name__.lower())
-    return dict2xml(asdict(instance), wrap=instance.__class__.__name__.lower(), indent='  ', data_sorter=DataSorter.never())
+    return dict2xml(
+        asdict(instance),
+        wrap=instance.__class__.__name__.lower(),
+        indent="  ",
+        data_sorter=DataSorter.never(),
+    )
+
 
 class ThoughtType(StrEnum):
     REFLECTION = "reflection"
@@ -35,7 +44,6 @@ class Thought:
         return dataclass_to_xml(self)
 
 
-
 @dataclass
 class Action:
     id: str
@@ -60,8 +68,6 @@ class Task:
     description: str
     actions: List[Action]
 
-
-
     def add_action(self, action: Action) -> None:
         self.actions.append(action)
 
@@ -74,10 +80,8 @@ class Task:
         return dataclass_to_xml(self)
 
 
-
 class Context:
-    def __init__(self):
-        self.conversation = []
+    def __init__(self, conversation_id: str):
         self.current_iteration = 0
         self.max_iterations = 5
         self.iterations = {}
@@ -86,6 +90,10 @@ class Context:
 
         self.current_task_id: str | None = None
         self.current_action_id: str | None = None
+
+        self.event_bus = EventBus(self.__class__.__name__)
+        self.message_service = MessageService()
+        self.conversation = self.message_service.get_conversation(conversation_id)
 
     @property
     def current_task(self) -> Task | None:
@@ -132,45 +140,70 @@ class Context:
 
     def complete_iteration(self) -> None:
         self.current_iteration += 1
+        self.event_bus.emit(
+            Event.ITERATION_COMPLETED,
+            {
+                "current_iteration": self.current_iteration,
+                "max_iterations": self.max_iterations,
+            },
+        )
 
     def iteration_exceeded(self) -> bool:
-        return self.current_iteration >= self.max_iterations
+        is_exceeded = self.current_iteration >= self.max_iterations
+        if not is_exceeded:
+            self.event_bus.emit(
+                Event.ITERATION_STARTED,
+                {
+                    "current_iteration": self.current_iteration,
+                    "max_iterations": self.max_iterations,
+                },
+            )
+
+        return is_exceeded
 
     def set_step_result(self, step_result: str) -> None:
         self.iterations[self.current_iteration].set_step_result(step_result)
 
     def can_do_final_answer(self) -> bool:
-        print(f"Current task ID: {self.current_task_id}")
-        print(f"Current action ID: {self.current_action_id}")
+        result = False
+
         if not self.current_task_id or not self.current_action_id:
             return True
 
         current_task = self.get_task_by_id(self.current_task_id)
-        if not current_task:
-            return False
+        if current_task:
+            current_action = current_task.get_action_by_id(self.current_action_id)
+            if current_action:
+                result = current_action.tool_name == "final_answer"
 
-        current_action = current_task.get_action_by_id(self.current_action_id)
-        if not current_action:
-            return False
+        if result:
+            self.event_bus.emit(
+                Event.FINAL_ANSWER_READY,
+                {
+                    "current_task_id": self.current_task_id,
+                    "current_action_id": self.current_action_id,
+                },
+            )
 
-        if current_action.tool_name == "final_answer":
-            return True
-
-        return False
+        return result
 
     def get_performed_tasks(self) -> str:
         return "No tasks are available"
 
     def as_dict(self) -> dict:
         return {
-            'current_iteration': self.current_iteration,
-            'max_iterations': self.max_iterations,
-            'thoughts': [asdict(thought) for thought in self.thoughts.values()],
-            'tasks': [asdict(task) for task in self.tasks],
-            'current_task': asdict(self.current_task) if self.current_task else None,
-            'current_action': asdict(self.current_action) if self.current_action else None
+            "current_iteration": self.current_iteration,
+            "max_iterations": self.max_iterations,
+            "thoughts": [asdict(thought) for thought in self.thoughts.values()],
+            "tasks": [asdict(task) for task in self.tasks],
+            "current_task": asdict(self.current_task) if self.current_task else None,
+            "current_action": asdict(self.current_action)
+            if self.current_action
+            else None,
         }
 
     def __repr__(self) -> str:
         data = self.as_dict()
-        return dict2xml(data, wrap='context', indent='  ', data_sorter=DataSorter.never())
+        return dict2xml(
+            data, wrap="context", indent="  ", data_sorter=DataSorter.never()
+        )

@@ -4,6 +4,7 @@ from providers.LLM.open_ai import OpenAI, OpenAIModels
 from entities.message import Message, MessageRole
 from langfuse.client import StatefulClient
 
+
 @dataclass
 class LLMCompletionResponse:
     text: str
@@ -18,7 +19,13 @@ class LLMService:
         self.open_ai = OpenAI()
 
     def completion(
-        self, query: str, prompt: Prompt, trace: StatefulClient, json_mode: bool = False, completion_name: str = "completion", model: str = OpenAIModels.GPT_4O
+        self,
+        query: str,
+        prompt: Prompt,
+        trace: StatefulClient,
+        json_mode: bool = False,
+        completion_name: str = "completion",
+        model: str = OpenAIModels.GPT_4O,
     ) -> Message:
         response = self.open_ai.completion(
             query=query,
@@ -26,7 +33,7 @@ class LLMService:
             json_mode=json_mode,
             model=model,
             trace=trace,
-            completion_name=completion_name
+            completion_name=completion_name,
         )
 
         text = response.choices[0].message.content or ""

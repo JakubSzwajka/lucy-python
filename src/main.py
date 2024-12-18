@@ -1,14 +1,19 @@
-import time
-import logging
-from fastapi import FastAPI, Request
 from dotenv import load_dotenv
+from fastapi.concurrency import asynccontextmanager
+from fastapi.responses import StreamingResponse
+from psycopg_pool import AsyncConnectionPool
 
-from agent import Agent
+from agents.modules.memory_manager import MemoryManager
+from agents.lucy.graph import Lucy
+from config import GlobalConfig
 
 loaded = load_dotenv()
 
-app = FastAPI()
-
+import logging
+from fastapi import FastAPI, Request
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.checkpoint.postgres import PostgresSaver
 
 logger = logging.getLogger()
 logger.handlers.clear()
@@ -18,7 +23,21 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-logger.info("Starting agent")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    connection_kwargs = {
+        "autocommit": True,
+        "prepare_threshold": 0,
+        # "row_factory": dict_row,
+    }
+    async with AsyncConnectionPool(GlobalConfig.get_db_url(), kwargs=connection_kwargs) as pool:
+        await pool.wait()  # optional
+        yield {"pool": pool}
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
@@ -26,13 +45,11 @@ async def root():
     return {"message": "Hello World"}
 
 
-# Right now only Alice App is supported
 @app.post("/")
-async def chat(request: Request):
-    agent = Agent()
+async def langchain(request: Request):
     data = await request.json()
     conversation_id = data.get("conversation_id")
-    user_id = data.get("user_id")
+    user_id = data.get("user_id", 'kuba-123')
     messages = data.get("messages")
     message = messages[
         -1
@@ -40,14 +57,44 @@ async def chat(request: Request):
         "content"
     )  # taking the last message since the conversation history should be stored on server side
 
-    start_time = time.time()
-    response = await agent.talk(message, user_id, conversation_id)
-    end_time = time.time()
+    if message == "mem":
+        MemoryManager().plot_memories()
+        return {
+            "object": "chat.completion",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": "assistant", "content": "Graph generated!"},
+                    "finish_reason": "stop",
+                }
+            ],
+        }
 
-    response_time = end_time - start_time
-    logger.info(f"Response time: {response_time} seconds")
 
-    return response.to_open_ai_dict()
+    async with request.state.pool.connection() as conn:
+        checkpointer = AsyncPostgresSaver(conn=conn)
+        await checkpointer.setup()
+        app = Lucy(checkpointer)
+
+        response = app.talk(message, RunnableConfig({
+            "configurable": {
+                "thread_id": conversation_id,
+                "user_id": user_id,
+            }
+        }))
+        # return StreamingResponse(response, media_type="text/event-stream")
+
+    return {
+        "object": "chat.completion",
+        "choices": [
+            {
+                "index": 0,
+                "message": {"role": "assistant", "content": "xyz"},
+                "finish_reason": "stop",
+            }
+        ],
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

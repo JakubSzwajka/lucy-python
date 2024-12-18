@@ -160,3 +160,5 @@ cython_debug/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+qdrant_storage

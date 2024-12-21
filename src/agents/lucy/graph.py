@@ -1,8 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import AsyncGenerator, AsyncIterable
+from typing import AsyncGenerator
 from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, END, StateGraph
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.prebuilt import ToolNode
@@ -11,17 +10,8 @@ from agents.common import route_tools
 from agents.lucy.prompts import MASTER_PROMPT
 from agents.lucy.tools import load_memories, TOOLS
 from config import GlobalConfig
-from psycopg_pool import ConnectionPool
-from config import GlobalConfig
-
-from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from psycopg_pool import AsyncConnectionPool
 from langchain.callbacks import AsyncIteratorCallbackHandler
-
 from langchain_core.runnables import RunnableConfig
 
 prompt = ChatPromptTemplate.from_messages(
@@ -47,12 +37,9 @@ class Lucy:
         self.agent = self._get_agent(checkpointer)
 
     def _get_agent(self, checkpointer: AsyncPostgresSaver):
-
-
         model = ChatOpenAI(model="gpt-4o")
         model_with_tools = model.bind_tools(self.tools)
 
-        # Define the function that calls the model
         async def _call_model(state: AgentState):
             memories_str = ""
             for memory in state["recall_memories"]:
@@ -77,12 +64,14 @@ class Lucy:
                 "tools_description": self._get_tools_description_string(),
             }
 
-            response = chain.invoke(invoke_data)
-            return {"messages": response}
-
+            # Switch to an async invoke method so we don't block
+            # response = await chain.ainvoke(invoke_data)
+            # return {"messages": response}
+            async for token in chain.astream(invoke_data):
+                print("response token", token)
+                yield token
 
         main_graph = StateGraph(state_schema=AgentState)
-        # Define the (single) node in the graph
         main_graph.add_node(ToolNodes.LOAD_MEMORIES, load_memories)
         main_graph.add_node(Agents.LUCY, _call_model)
         main_graph.add_node("tools", ToolNode(self.tools))
@@ -95,16 +84,16 @@ class Lucy:
         app = main_graph.compile(checkpointer=checkpointer)
         return app
 
-
     def _get_tools_description_string(self):
-        tools = ""
+        tools_info = ""
         for tool in self.tools:
-            tools += f"""<tool>
+            tools_info += f"""<tool>
                 <name>{tool.name}</name>
                 <description>{tool.description}</description>
             </tool>\n"""
-        return tools
+        return tools_info
 
     async def talk(self, message: str, config: RunnableConfig):
-        response = self.agent.invoke({"messages": [("user", message)]}, config=config)
+        # Now it’s an async call
+        response = await self.agent.ainvoke({"messages": [("user", message)]}, config=config)
         return response

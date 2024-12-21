@@ -84,29 +84,34 @@ async def langchain(request: Request):
             config = RunnableConfig({"configurable": {"thread_id": conversation_id, "user_id": user_id}})
 
             # Example: hypothetical streaming method
+            # lucy_agent.agent.get_graph().print_ascii()
             async for token_type, token in lucy_agent.agent.astream(
                 input={"messages": [("user", message)]},
                 config=config,
-                stream_mode=["messages"],
+                stream_mode=["messages", "values"],
             ):
-                message_chunk, config = token
-                if isinstance(message_chunk, AIMessageChunk):
-                    data = {
-                        "id": message_chunk.id,
-                        "object": "chat.completion.chunk",
-                        "created": datetime.now().timestamp(),
-                        "model": message_chunk.response_metadata.get("model_name"),
-                        "system_fingerprint": message_chunk.response_metadata.get("system_fingerprint"),
-                        "choices": [
-                            {
-                                "index": 0,
-                                "delta": {"role": "assistant", "content": message_chunk.content},
-                                "logprobs": None,
-                                "finish_reason": None,
-                            }
-                        ],
-                    }
-                    yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
+                if token_type == "messages":
+                    message_chunk, config = token
+                    if isinstance(message_chunk, AIMessageChunk):
+                        data = {
+                            "id": message_chunk.id,
+                            "object": "chat.completion.chunk",
+                            "created": datetime.now().timestamp(),
+                            "model": message_chunk.response_metadata.get("model_name"),
+                            "system_fingerprint": message_chunk.response_metadata.get("system_fingerprint"),
+                            "choices": [
+                                {
+                                    "index": 0,
+                                    "delta": {"role": "assistant", "content": message_chunk.content},
+                                    "logprobs": None,
+                                    "finish_reason": None,
+                                }
+                            ],
+                        }
+                        yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
+                # elif token_type == "values":
+                #     print('token', token)
+                #     print('========================')
         return StreamingResponse(stream_chat(), media_type="text/event-stream")
 
 

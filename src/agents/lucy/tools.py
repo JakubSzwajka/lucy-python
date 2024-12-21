@@ -73,6 +73,7 @@ class ListTasksTool(BaseTool):
     args_schema: Type[BaseModel] = ListTasksFilters
 
     def _run(self, filter: str, config: RunnableConfig, run_manager: Optional[CallbackManagerForToolRun] = None) -> List[dict]:
+        print("--------------> Calling list_tasks tool", filter)
         tasks = TodoistClient().get_tasks(filter)
         return [t.to_dict() for t in tasks]
 

@@ -1,18 +1,18 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import AsyncGenerator
 from langchain_openai import ChatOpenAI
-from langgraph.graph import START, END, StateGraph
+from langgraph.graph import START, StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.prebuilt import ToolNode
 from agents.state import AgentState
-from agents.common import route_tools
 from agents.lucy.prompts import MASTER_PROMPT
 from agents.lucy.tools import load_memories, TOOLS
 from config import GlobalConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langchain.callbacks import AsyncIteratorCallbackHandler
 from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import tools_condition
+from agents.common import route_tools
+from langchain_core.messages import AIMessageChunk, ToolCallChunk, AIMessage
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -67,9 +67,11 @@ class Lucy:
             # Switch to an async invoke method so we don't block
             # response = await chain.ainvoke(invoke_data)
             # return {"messages": response}
-            async for token in chain.astream(invoke_data):
-                print("response token", token)
-                yield token
+            # async for chunk in chain.astream(invoke_data):
+            #     yield chunk
+
+            response = await chain.ainvoke(invoke_data)
+            return {"messages": response}
 
         main_graph = StateGraph(state_schema=AgentState)
         main_graph.add_node(ToolNodes.LOAD_MEMORIES, load_memories)
@@ -93,7 +95,3 @@ class Lucy:
             </tool>\n"""
         return tools_info
 
-    async def talk(self, message: str, config: RunnableConfig):
-        # Now it’s an async call
-        response = await self.agent.ainvoke({"messages": [("user", message)]}, config=config)
-        return response

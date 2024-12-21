@@ -61,6 +61,7 @@ def route_tools(state: AgentState):
         Literal["tools", "__end__"]: The next step in the graph.
     """
     msg = state["messages"][-1]
+    print('Tool calls -------', state)
     if isinstance(msg, AIMessage) and msg.tool_calls:
         return "tools"
 

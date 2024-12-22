@@ -6,13 +6,11 @@ from langchain_core.prompts import ChatPromptTemplate
 from langgraph.prebuilt import ToolNode
 from agents.state import AgentState
 from agents.lucy.prompts import MASTER_PROMPT
-from agents.lucy.tools import load_memories, TOOLS
+from agents.lucy.tools import TOOLS
+from agents.lucy.tools.memory import load_memories
 from config import GlobalConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langchain_core.runnables import RunnableConfig
-from langgraph.prebuilt import tools_condition
 from agents.common import route_tools
-from langchain_core.messages import AIMessageChunk, ToolCallChunk, AIMessage
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -21,13 +19,16 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
+
 class Agents(StrEnum):
     LUCY = "lucy"
+
 
 class ToolNodes(StrEnum):
     LOAD_MEMORIES = "load_memories"
     SAVE_MEMORY = "save_memory"
     RECALL_MEMORIES = "recall_memories"
+
 
 class Lucy:
     def __init__(self, checkpointer: AsyncPostgresSaver):
@@ -94,4 +95,3 @@ class Lucy:
                 <description>{tool.description}</description>
             </tool>\n"""
         return tools_info
-

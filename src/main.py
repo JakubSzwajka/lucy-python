@@ -9,7 +9,7 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import StreamingResponse
 from psycopg_pool import AsyncConnectionPool
 from langchain_core.messages import AIMessageChunk
-from agents.modules.memory_manager import MemoryManager
+from agents.services.qdrant_manager import MemoryManager
 from agents.lucy.graph import Lucy
 from config import GlobalConfig
 
@@ -26,13 +26,16 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connection_kwargs = {
         "autocommit": True,
         "prepare_threshold": 0,
     }
-    async with AsyncConnectionPool(GlobalConfig.get_db_url(), kwargs=connection_kwargs) as pool:
+    async with AsyncConnectionPool(
+        GlobalConfig.get_db_url(), kwargs=connection_kwargs
+    ) as pool:
         await pool.wait()  # optional
         yield {"pool": pool}
 
@@ -81,7 +84,9 @@ async def langchain(request: Request):
         lucy_agent = Lucy(checkpointer)
 
         async def stream_chat() -> AsyncGenerator[str, None]:
-            config = RunnableConfig({"configurable": {"thread_id": conversation_id, "user_id": user_id}})
+            config = RunnableConfig(
+                {"configurable": {"thread_id": conversation_id, "user_id": user_id}}
+            )
 
             # Example: hypothetical streaming method
             # lucy_agent.agent.get_graph().print_ascii()
@@ -98,11 +103,16 @@ async def langchain(request: Request):
                             "object": "chat.completion.chunk",
                             "created": datetime.now().timestamp(),
                             "model": message_chunk.response_metadata.get("model_name"),
-                            "system_fingerprint": message_chunk.response_metadata.get("system_fingerprint"),
+                            "system_fingerprint": message_chunk.response_metadata.get(
+                                "system_fingerprint"
+                            ),
                             "choices": [
                                 {
                                     "index": 0,
-                                    "delta": {"role": "assistant", "content": message_chunk.content},
+                                    "delta": {
+                                        "role": "assistant",
+                                        "content": message_chunk.content,
+                                    },
                                     "logprobs": None,
                                     "finish_reason": None,
                                 }
@@ -112,6 +122,7 @@ async def langchain(request: Request):
                 # elif token_type == "values":
                 #     print('token', token)
                 #     print('========================')
+
         return StreamingResponse(stream_chat(), media_type="text/event-stream")
 
 

@@ -2,6 +2,7 @@ from enum import StrEnum
 import os
 from typing_extensions import TypedDict
 
+
 class User(TypedDict):
     id: str
     name: str
@@ -17,7 +18,6 @@ class GlobalConfig:
         User(id="recB4CxsAvykFwcAs", name="Kuba"),
         User(id="recc8JOHDhduumYWz", name="Lucy"),
     ]
-
 
     @staticmethod
     def get_db_url() -> str:

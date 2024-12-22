@@ -1,4 +1,3 @@
-
 MASTER_PROMPT = """
 <master_prompt>
     <main_objective>
@@ -61,6 +60,3 @@ MASTER_PROMPT = """
     </instructions>
 </master_prompt>
 """
-
-
-

@@ -18,11 +18,13 @@ def get_user_id(config: RunnableConfig):
     return user_id
 
 
-
-
-def make_supervisor_node(llm: BaseChatModel, members: list[str], prompt: Optional[str] = None):
+def make_supervisor_node(
+    llm: BaseChatModel, members: list[str], prompt: Optional[str] = None
+):
     options = ["FINISH"] + members
-    system_prompt = prompt or """
+    system_prompt = (
+        prompt
+        or """
 You are a supervisor tasked with managing a conversation between the
 following workers: {members}. Given the following user request,
 respond with the worker to act next. Each worker will perform a
@@ -30,25 +32,26 @@ task and respond with their results and status. When finished,
 respond with FINISH."
 
     """
+    )
+
     class Router(TypedDict):
         """Worker to route to next. If no workers needed, route to FINISH."""
 
-        next: Literal[*options] # type: ignore
+        next: Literal[*options]  # type: ignore
 
-    def supervisor_node(state: MessagesState) -> Command[Literal[*members, "__end__"]]: # type: ignore
+    def supervisor_node(state: MessagesState) -> Command[Literal[*members, "__end__"]]:  # type: ignore
         """An LLM-based router."""
         messages = [
             {"role": "system", "content": system_prompt},
         ] + state["messages"]
         response = llm.with_structured_output(Router).invoke(messages)
-        goto = response["next"] # type: ignore
+        goto = response["next"]  # type: ignore
         if goto == "FINISH":
             goto = END
 
         return Command(goto=goto)
 
     return supervisor_node
-
 
 
 def route_tools(state: AgentState):

@@ -11,12 +11,12 @@ class TodoistClient:
         self.client = TodoistAPI(token=token)
 
     def get_tasks(self, filter: str):
-        return self.client.get_tasks(
-            filter=filter
-        )
+        return self.client.get_tasks(filter=filter)
 
     def add_task(self, name: str, due_date: str, description: Optional[str] = None):
-        return self.client.add_task(content=name, due_date=due_date, description=description)
+        return self.client.add_task(
+            content=name, due_date=due_date, description=description
+        )
 
     def complete_task(self, task_id: str):
         return self.client.close_task(task_id)

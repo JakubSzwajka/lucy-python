@@ -61,21 +61,34 @@ async def langchain(request: Request):
         return {"error": "No messages provided"}
 
     # Grab the latest message from the conversation
-    message = messages[-1].get("content", "")
+    message_payload = messages[-1]
+    # print('Message payload: ', message_payload)
+    messages = []
+    if type(message_payload) != list:
+        messages.append(("user", message_payload.get("content", "")))
+    elif type(message_payload) == list:
+        raise Exception('Message is a list. Probably a file upload. Not supported yet.')
+        # print('Message is a list')
+        # print('First message: ', message_payload[0])
+        # for m in message_payload:
+        #     if m.get("type") == "text":
+        #         messages.append(("User", m.get("content", "")))
+        #     else:
+        #         messages.append(("User", m))
 
     # Simple check for special 'mem' command
-    if message.lower().strip() == "mem":
-        MemoryManager().plot_memories()
-        return {
-            "object": "chat.completion",
-            "choices": [
-                {
-                    "index": 0,
-                    "message": {"role": "assistant", "content": "Graph generated!"},
-                    "finish_reason": "stop",
-                }
-            ],
-        }
+    # if message.lower().strip() == "mem":
+    #     MemoryManager().plot_memories()
+    #     return {
+    #         "object": "chat.completion",
+    #         "choices": [
+    #             {
+    #                 "index": 0,
+    #                 "message": {"role": "assistant", "content": "Graph generated!"},
+    #                 "finish_reason": "stop",
+    #             }
+    #         ],
+    #     }
 
     async with request.state.pool.connection() as conn:
         checkpointer = AsyncPostgresSaver(conn=conn)
@@ -91,13 +104,14 @@ async def langchain(request: Request):
             # Example: hypothetical streaming method
             # lucy_agent.agent.get_graph().print_ascii()
             async for token_type, token in lucy_agent.agent.astream(
-                input={"messages": [("user", message)]},
+                input={"messages": messages},
                 config=config,
                 stream_mode=["messages", "values"],
             ):
                 if token_type == "messages":
                     message_chunk, config = token
                     if isinstance(message_chunk, AIMessageChunk):
+                        # print('Message chunk: ', message_chunk)
                         data = {
                             "id": message_chunk.id,
                             "object": "chat.completion.chunk",
@@ -115,7 +129,7 @@ async def langchain(request: Request):
                                     },
                                     "logprobs": None,
                                     "finish_reason": None,
-                                }
+                                },
                             ],
                         }
                         yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"

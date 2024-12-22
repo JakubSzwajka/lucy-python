@@ -2,12 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Type, TypedDict
 from langchain_core.runnables.config import RunnableConfig
 from agents.services.resend_email import ResendEmailService
-from agents.services.trello_manager import (
-    TrelloBoard,
-    TrelloCard,
-    TrelloCheckListItem,
-    TrelloManager,
-)
 from langchain.tools import BaseTool
 from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
@@ -43,6 +37,7 @@ class SendEmailTool(BaseTool):
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ):
         from_email = "lucy@kubaszwajka.com"
+        to_emails = ['szwajkajakub@gmail.com'] # force to send only to me
         return ResendEmailService().send_email(
             from_email, to_emails, subject, html, text
         )

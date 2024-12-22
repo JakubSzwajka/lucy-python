@@ -72,6 +72,7 @@ class Lucy:
             #     yield chunk
 
             response = await chain.ainvoke(invoke_data)
+            # print('Response', response)
             return {"messages": response}
 
         main_graph = StateGraph(state_schema=AgentState)

@@ -1,3 +1,4 @@
+from .calendar import CalendarGetUpcomingEventsTool
 from .emails import SendEmailTool
 from .drive import GetFilesTool, ListFilesTool
 from .memory import SaveMemoryTool, RecallMemoriesTool
@@ -17,4 +18,5 @@ TOOLS = [
     SendEmailTool(),
     ListFilesTool(),
     GetFilesTool(),
+    CalendarGetUpcomingEventsTool(),
 ]

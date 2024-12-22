@@ -1,4 +1,5 @@
-from agents.lucy.tools.emails import SendEmailTool
+from .emails import SendEmailTool
+from .drive import GetFilesTool, ListFilesTool
 from .memory import SaveMemoryTool, RecallMemoriesTool
 from .todoist import ListTasksTool, CreateTaskTool, CompleteTaskTool
 from .trello import GetBoardTool, CreateCardTool, ListProjectsTool, UpdateCardTool
@@ -14,4 +15,6 @@ TOOLS = [
     CreateCardTool(),
     UpdateCardTool(),
     SendEmailTool(),
+    ListFilesTool(),
+    GetFilesTool(),
 ]

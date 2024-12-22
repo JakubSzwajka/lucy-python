@@ -162,3 +162,8 @@ Temporary Items
 .apdisk
 
 qdrant_storage
+
+memories.yaml
+
+creds/**
+token.json

@@ -121,3 +121,12 @@ class MemoryManager:
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color="red")
         plt.show()
         return "Memory graph plotted"
+
+    def dump_memories(self):
+        points = self.vectorstore.client.scroll(
+            collection_name="lucy",
+            limit=1000,
+            with_payload=True,
+            with_vectors=False,
+        )
+        return points[0]

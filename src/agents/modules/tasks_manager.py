@@ -17,3 +17,6 @@ class TodoistClient:
 
     def add_task(self, name: str, due_date: str, description: Optional[str] = None):
         return self.client.add_task(content=name, due_date=due_date, description=description)
+
+    def complete_task(self, task_id: str):
+        return self.client.close_task(task_id)

@@ -5,7 +5,7 @@ from .memory import SaveMemoryTool, RecallMemoriesTool
 from .todoist import ListTasksTool, CreateTaskTool, CompleteTaskTool
 from .trello import GetBoardTool, CreateCardTool, ListProjectsTool, UpdateCardTool
 
-TOOLS = [
+LUCY_TOOLS = [
     SaveMemoryTool(),
     RecallMemoriesTool(),
     ListTasksTool(),

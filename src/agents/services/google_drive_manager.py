@@ -1,8 +1,16 @@
+import io
 from typing import TypedDict
 
 from googleapiclient.discovery import build
 from agents.services.google_scopes import GoogleManagerBase
+from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaFileUpload
 
+
+# class StringFileUpload(MediaFileUpload):
+#     def __init__(self, filename, mimetype=None, chunksize=DEFAULT_CHUNK_SIZE, resumable=False):
+#         super().__init__(filename, mimetype, chunksize, resumable)
+#         self.content = content
 
 class Document(TypedDict):
     id: str
@@ -38,3 +46,30 @@ class GoogleDriveManager(GoogleManagerBase):
             metadata={}
         ) for item in items]
 
+    def update_file(self, file_id: str, name: str, mime_type: str, content: str):
+        file_metadata = {
+            'name': name,
+            'mimeType': mime_type,
+        }
+        body = MediaFileUpload(
+            filename=name,
+            mimetype=mime_type,
+        )
+
+        file = self.service.files().update(
+            fileId=file_id,
+            body=file_metadata,
+            media_body=body,
+        ).execute()
+        return file
+
+    def get_file_content(self, file_id: str):
+        request = self.service.files().get_media(fileId=file_id)
+        file = io.BytesIO()
+        downloader = MediaIoBaseDownload(file, request)
+        done = False
+        while done is False:
+            _, done = downloader.next_chunk()
+            # print(f"Download {int(status.progress() * 100)}.")
+
+        return file.getvalue().decode('utf-8')

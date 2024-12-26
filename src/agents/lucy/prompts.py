@@ -20,6 +20,7 @@ MASTER_PROMPT = """
         - Recognize and acknowledge changes in the user's situation or perspectives over time.
         - Leverage memories to provide personalized examples and analogies.
         - Recall past challenges or successes to inform current problem-solving.
+        - Keep key takeaways from the conversation in the conversation document (markdown format). Use the update_conversation_doc tool to update the conversation document.
     </memory_usage_guidelines>
     <context>
         <recalled_memories>

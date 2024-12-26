@@ -54,7 +54,8 @@ respond with FINISH."
     return supervisor_node
 
 
-def route_tools(state: AgentState):
+def get_tool_router(tool_node: str, else_node: str):
+
     """Determine whether to use tools or end the conversation based on the last message.
 
     Args:
@@ -63,8 +64,9 @@ def route_tools(state: AgentState):
     Returns:
         Literal["tools", "__end__"]: The next step in the graph.
     """
-    msg = state["messages"][-1]
-    if isinstance(msg, AIMessage) and msg.tool_calls:
-        return "tools"
-
-    return END
+    def router(state: AgentState):
+        msg = state["messages"][-1]
+        if isinstance(msg, AIMessage) and msg.tool_calls:
+            return tool_node
+        return else_node
+    return router

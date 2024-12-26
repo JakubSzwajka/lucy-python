@@ -16,6 +16,8 @@ from config import GlobalConfig
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
+from agents import Agents
+
 loaded = load_dotenv()
 
 logger = logging.getLogger()
@@ -68,27 +70,6 @@ async def langchain(request: Request):
         messages.append(("user", message_payload.get("content", "")))
     elif type(message_payload) == list:
         raise Exception('Message is a list. Probably a file upload. Not supported yet.')
-        # print('Message is a list')
-        # print('First message: ', message_payload[0])
-        # for m in message_payload:
-        #     if m.get("type") == "text":
-        #         messages.append(("User", m.get("content", "")))
-        #     else:
-        #         messages.append(("User", m))
-
-    # Simple check for special 'mem' command
-    # if message.lower().strip() == "mem":
-    #     MemoryManager().plot_memories()
-    #     return {
-    #         "object": "chat.completion",
-    #         "choices": [
-    #             {
-    #                 "index": 0,
-    #                 "message": {"role": "assistant", "content": "Graph generated!"},
-    #                 "finish_reason": "stop",
-    #             }
-    #         ],
-    #     }
 
     async with request.state.pool.connection() as conn:
         checkpointer = AsyncPostgresSaver(conn=conn)
@@ -106,12 +87,14 @@ async def langchain(request: Request):
             async for token_type, token in lucy_agent.agent.astream(
                 input={"messages": messages},
                 config=config,
-                stream_mode=["messages", "values"],
+                stream_mode=["messages"],
             ):
+                # https://langchain-ai.github.io/langgraph/how-tos/streaming-from-final-node/#filter-on-event-metadata
                 if token_type == "messages":
                     message_chunk, config = token
-                    if isinstance(message_chunk, AIMessageChunk):
-                        # print('Message chunk: ', message_chunk)
+                    node = config.get("langgraph_node") # type: ignore
+                    if isinstance(message_chunk, AIMessageChunk) and node == Agents.LUCY:
+
                         data = {
                             "id": message_chunk.id,
                             "object": "chat.completion.chunk",
@@ -133,6 +116,9 @@ async def langchain(request: Request):
                             ],
                         }
                         yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
+                # elif token_type == "updates":
+                    # print('Updates: ', token)
+                    # print('========================')
                 # elif token_type == "values":
                 #     print('token', token)
                 #     print('========================')

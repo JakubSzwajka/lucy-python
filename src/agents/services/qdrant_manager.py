@@ -89,7 +89,7 @@ class MemoryManager:
         self.vectorstore.add_documents(documents)
 
     def recall_memories(self, query: str, user_id: str):
-        documents = self.vectorstore.similarity_search(query, k=3)
+        documents = self.vectorstore.similarity_search(query, k=10)
         return [document.metadata for document in documents]
 
     def plot_memories(self):

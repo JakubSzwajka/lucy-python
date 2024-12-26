@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel, Field
 from typing import List, Optional, Type
 from langchain_core.runnables.config import RunnableConfig
@@ -7,10 +8,12 @@ from agents.state import AgentState
 from agents.common import get_user_id
 from langchain.tools import BaseTool
 from agents.services.qdrant_manager import KnowledgeTriple, MemoryManager
-
+from langgraph.types import Command
 from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
 )
+
+from agents.lucy.document import Document
 
 
 class MessageWithMemory(BaseModel):
@@ -55,7 +58,6 @@ class RecallMemoriesTool(BaseTool):
         documents = MemoryManager().recall_memories(query, user_id)
         return documents
 
-
 def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     """Load memories for the current conversation.
 
@@ -66,12 +68,26 @@ def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     Returns:
         State: The updated state with loaded memories.
     """
-
     tokenizer = tiktoken.encoding_for_model("gpt-4o")
     convo_str = get_buffer_string(state["messages"])
     convo_str = tokenizer.decode(tokenizer.encode(convo_str)[:2048])
     memories = MemoryManager().recall_memories(convo_str, get_user_id(config))
+
+    # ----------- conversation doc ------------
+    thread_id = config.get("metadata", {}).get("thread_id", None)
+    if not thread_id:
+        thread_id = str(uuid.uuid4())
+
+
     return {
         "recall_memories": memories,
         "messages": state["messages"],
+        "thoughts_doc": state.get("thoughts_doc", Document(
+            id=thread_id,
+            name=f"conversation_{thread_id}",
+            url="",
+            mime_type="text/markdown",
+            content="",
+        )),
+        "thoughts": "",
     }

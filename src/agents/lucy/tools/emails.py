@@ -37,7 +37,7 @@ class SendEmailTool(BaseTool):
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ):
         from_email = "lucy@kubaszwajka.com"
-        to_emails = ['szwajkajakub@gmail.com'] # force to send only to me
+        to_emails = ["szwajkajakub@gmail.com"]  # force to send only to me
         return ResendEmailService().send_email(
             from_email, to_emails, subject, html, text
         )

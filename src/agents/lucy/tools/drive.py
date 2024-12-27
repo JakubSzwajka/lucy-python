@@ -39,18 +39,34 @@ class ListFilesTool(BaseTool):
     name: str = "list_files"
     description: str = f"List all files from google drive. {GOOGLE_DRIVE_DESCRIPTION}"
 
-    def _run(self, config: RunnableConfig, run_manager: Optional[CallbackManagerForToolRun] = None):
+    def _run(
+        self,
+        config: RunnableConfig,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ):
         return GoogleDriveManager().list_files()
 
 
 class FileToLoad(BaseModel):
-    id: str = Field(description="The id of the file to load. If unknown, use list_files tool to get the list of files.")
-    name: str = Field(description="The name of the file to load. If unknown, use list_files tool to get the list of files.")
-    mime_type: str = Field(description="The mime type of the file to load. If unknown, use list_files tool to get the list of files.")
-    url: str = Field(description="The url of the file to load. If unknown, use list_files tool to get the list of files.")
+    id: str = Field(
+        description="The id of the file to load. If unknown, use list_files tool to get the list of files."
+    )
+    name: str = Field(
+        description="The name of the file to load. If unknown, use list_files tool to get the list of files."
+    )
+    mime_type: str = Field(
+        description="The mime type of the file to load. If unknown, use list_files tool to get the list of files."
+    )
+    url: str = Field(
+        description="The url of the file to load. If unknown, use list_files tool to get the list of files."
+    )
+
 
 class GetFileToolPayload(BaseModel):
-    files: List[FileToLoad] = Field(description="List of files to load with their ids and mime types.")
+    files: List[FileToLoad] = Field(
+        description="List of files to load with their ids and mime types."
+    )
+
 
 class GetFilesTool(BaseTool):
     name: str = "get_files"
@@ -70,7 +86,7 @@ class GetFilesTool(BaseTool):
         for file in files:
             if file.mime_type == "application/vnd.google-apps.spreadsheet":
                 sheets.append(file)
-            if file.mime_type == 'text/x-markdown':
+            if file.mime_type == "text/x-markdown":
                 markdown_files.append(file)
             else:
                 others.append(file)
@@ -102,20 +118,23 @@ class GetFilesTool(BaseTool):
                         "google_drive_id": f.id,
                         "mime_type": f.mime_type,
                         "url": f.url,
-                        "name": f.name
-                    }
+                        "name": f.name,
+                    },
                 )
                 docs = loader.load()
                 final_docs.extend(docs)
         print(final_docs)
-        return [Document(
-            id=doc.metadata.get("google_drive_id", "unknown"),
-            name=doc.metadata.get("name", "unknown"),
-            content=doc.page_content,
-            url=doc.metadata.get("url", "unknown"),
-            mime_type=doc.metadata.get("mime_type", "unknown"),
-            # metadata=doc.metadata,
-        ) for doc in final_docs]
+        return [
+            Document(
+                id=doc.metadata.get("google_drive_id", "unknown"),
+                name=doc.metadata.get("name", "unknown"),
+                content=doc.page_content,
+                url=doc.metadata.get("url", "unknown"),
+                mime_type=doc.metadata.get("mime_type", "unknown"),
+                # metadata=doc.metadata,
+            )
+            for doc in final_docs
+        ]
 
 
 # class UpdateFileToolPayload(BaseModel):

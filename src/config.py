@@ -26,10 +26,16 @@ class GlobalConfig:
             raise ValueError("DB_URL is not set")
         return url
 
-
     @staticmethod
     def get_qdrant_url() -> str:
         url = os.getenv("QDRANT_URL")
         if not url:
             raise ValueError("QDRANT_URL is not set")
         return url
+
+    @staticmethod
+    def get_qdrant_api_key() -> str:
+        api_key = os.getenv("QDRANT_API_KEY")
+        if not api_key:
+            raise ValueError("QDRANT_API_KEY is not set")
+        return api_key

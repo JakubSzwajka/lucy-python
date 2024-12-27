@@ -5,9 +5,7 @@ from googleapiclient.discovery import build
 from agents.services.google_scopes import GoogleManagerBase
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = [
-    "https://www.googleapis.com/auth/calendar.readonly"
-]
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
 class Event(TypedDict):
@@ -18,11 +16,11 @@ class Event(TypedDict):
     calendar_id: str
     calendar_name: str
 
+
 class GoogleCalendarManager(GoogleManagerBase):
     def __init__(self):
         super().__init__("calendar", SCOPES)
         self.service = build("calendar", "v3", credentials=self.creds)
-
 
     def get_upcoming_events(self, days: int):
         time_min = datetime.now().isoformat() + "Z"
@@ -58,14 +56,15 @@ class GoogleCalendarManager(GoogleManagerBase):
                 else:
                     end = event["end"]
 
-                final_events.append(Event(
-                    id=event.get("id", ""),
-                    summary=event.get("summary", ""),
-                    start=start,
-                    end=end,
-                    calendar_id=cal["id"],
-                    calendar_name=cal["summary"],
-                ))
+                final_events.append(
+                    Event(
+                        id=event.get("id", ""),
+                        summary=event.get("summary", ""),
+                        start=start,
+                        end=end,
+                        calendar_id=cal["id"],
+                        calendar_name=cal["summary"],
+                    )
+                )
 
         return final_events
-

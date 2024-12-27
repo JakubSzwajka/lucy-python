@@ -12,12 +12,14 @@ from googleapiclient.http import MediaFileUpload
 #         super().__init__(filename, mimetype, chunksize, resumable)
 #         self.content = content
 
+
 class Document(TypedDict):
     id: str
     name: str
     url: str
     mime_type: str
     metadata: dict
+
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -34,33 +36,43 @@ class GoogleDriveManager(GoogleManagerBase):
         # Call the Drive v3 API
         results = (
             self.service.files()
-            .list(pageSize=100, fields="nextPageToken, files(id, name, mimeType, webViewLink)")
+            .list(
+                pageSize=100,
+                fields="nextPageToken, files(id, name, mimeType, webViewLink)",
+            )
             .execute()
         )
         items = results.get("files", [])
-        return [Document(
-            id=item["id"],
-            name=item["name"],
-            url=item["webViewLink"],
-            mime_type=item["mimeType"],
-            metadata={}
-        ) for item in items]
+        return [
+            Document(
+                id=item["id"],
+                name=item["name"],
+                url=item["webViewLink"],
+                mime_type=item["mimeType"],
+                metadata={},
+            )
+            for item in items
+        ]
 
     def update_file(self, file_id: str, name: str, mime_type: str, content: str):
         file_metadata = {
-            'name': name,
-            'mimeType': mime_type,
+            "name": name,
+            "mimeType": mime_type,
         }
         body = MediaFileUpload(
             filename=name,
             mimetype=mime_type,
         )
 
-        file = self.service.files().update(
-            fileId=file_id,
-            body=file_metadata,
-            media_body=body,
-        ).execute()
+        file = (
+            self.service.files()
+            .update(
+                fileId=file_id,
+                body=file_metadata,
+                media_body=body,
+            )
+            .execute()
+        )
         return file
 
     def get_file_content(self, file_id: str):
@@ -72,4 +84,4 @@ class GoogleDriveManager(GoogleManagerBase):
             _, done = downloader.next_chunk()
             # print(f"Download {int(status.progress() * 100)}.")
 
-        return file.getvalue().decode('utf-8')
+        return file.getvalue().decode("utf-8")

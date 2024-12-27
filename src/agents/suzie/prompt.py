@@ -48,7 +48,6 @@
 # """
 
 
-
 REFLECTION_MASTER_PROMPT = """
 <master_prompt>
     <main_objective>

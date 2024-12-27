@@ -93,7 +93,11 @@ class Lucy:
         main_graph.add_edge(ToolNodes.LOAD_MEMORIES, ToolNodes.REFLECT_ON_INTERACTION)
         main_graph.add_edge(ToolNodes.REFLECT_ON_INTERACTION, Agents.LUCY)
 
-        main_graph.add_conditional_edges(Agents.LUCY, get_tool_router(ToolNodes.LUCY_TOOLS, END), [ToolNodes.LUCY_TOOLS, END])
+        main_graph.add_conditional_edges(
+            Agents.LUCY,
+            get_tool_router(ToolNodes.LUCY_TOOLS, END),
+            [ToolNodes.LUCY_TOOLS, END],
+        )
 
         main_graph.add_edge(ToolNodes.LUCY_TOOLS, Agents.LUCY)
 

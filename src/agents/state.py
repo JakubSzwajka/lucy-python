@@ -1,7 +1,7 @@
-from langgraph.graph import  MessagesState
+from langgraph.graph import MessagesState
 from typing import List
 
-from agents.lucy.document import  ThoughtsDoc
+from agents.lucy.document import ThoughtsDoc
 
 
 class AgentState(MessagesState):

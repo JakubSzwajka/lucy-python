@@ -9,7 +9,6 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import StreamingResponse
 from psycopg_pool import AsyncConnectionPool
 from langchain_core.messages import AIMessageChunk
-from agents.services.qdrant_manager import MemoryManager
 from agents.lucy.graph import Lucy
 from config import GlobalConfig
 
@@ -18,7 +17,8 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from agents import Agents
 
-loaded = load_dotenv('/Users/kuba.szwajka/DEV/priv/lucy-all/lucy-python/src/.env.prod')
+# loaded = load_dotenv('/Users/kuba.szwajka/DEV/priv/lucy-all/lucy-python/.env')
+loaded = load_dotenv()
 
 logger = logging.getLogger()
 logger.handlers.clear()
@@ -50,7 +50,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/")
+@app.post("/ai/stream")
 async def langchain(request: Request):
     """
     An endpoint that demonstrates e2e async streaming from Lucy using a Postgres checkpointer.
@@ -69,7 +69,7 @@ async def langchain(request: Request):
     if type(message_payload) != list:
         messages.append(("user", message_payload.get("content", "")))
     elif type(message_payload) == list:
-        raise Exception('Message is a list. Probably a file upload. Not supported yet.')
+        raise Exception("Message is a list. Probably a file upload. Not supported yet.")
 
     async with request.state.pool.connection() as conn:
         checkpointer = AsyncPostgresSaver(conn=conn)
@@ -92,9 +92,11 @@ async def langchain(request: Request):
                 # https://langchain-ai.github.io/langgraph/how-tos/streaming-from-final-node/#filter-on-event-metadata
                 if token_type == "messages":
                     message_chunk, config = token
-                    node = config.get("langgraph_node") # type: ignore
-                    if isinstance(message_chunk, AIMessageChunk) and node == Agents.LUCY:
-
+                    node = config.get("langgraph_node")  # type: ignore
+                    if (
+                        isinstance(message_chunk, AIMessageChunk)
+                        and node == Agents.LUCY
+                    ):
                         data = {
                             "id": message_chunk.id,
                             "object": "chat.completion.chunk",
@@ -116,12 +118,6 @@ async def langchain(request: Request):
                             ],
                         }
                         yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
-                # elif token_type == "updates":
-                    # print('Updates: ', token)
-                    # print('========================')
-                # elif token_type == "values":
-                #     print('token', token)
-                #     print('========================')
 
         return StreamingResponse(stream_chat(), media_type="text/event-stream")
 

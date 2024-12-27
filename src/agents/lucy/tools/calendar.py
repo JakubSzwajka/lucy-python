@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 from agents.services.google_calendar_manager import GoogleCalendarManager
 
 
-
 CALENDAR_DESCRIPTION = """
 Calendar is used to get the events from the user's calendar.
 Events might be part of multiple calendars.
@@ -30,7 +29,11 @@ class CalendarGetUpcomingEventsTool(BaseTool):
     description: str = CALENDAR_DESCRIPTION
     args_schema: Type[BaseModel] = CalendarGetUpcomingEventsToolPayload
 
-    def _run(self, days: int, config: RunnableConfig, run_manager: Optional[CallbackManagerForToolRun] = None):
+    def _run(
+        self,
+        days: int,
+        config: RunnableConfig,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ):
         gd = GoogleCalendarManager()
         return gd.get_upcoming_events(days=days)
-

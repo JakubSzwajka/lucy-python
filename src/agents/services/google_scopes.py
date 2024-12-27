@@ -6,7 +6,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 
-
 class GoogleManagerBase:
     def __init__(self, token_name: str, scopes: list[str]):
         self.token_name = token_name
@@ -19,7 +18,9 @@ class GoogleManagerBase:
         # created automatically when the authorization flow completes for the first
         # time.
         if os.path.exists(f"creds/{self.token_name}_token.json"):
-            creds = Credentials.from_authorized_user_file(f"creds/{self.token_name}_token.json", self.scopes)
+            creds = Credentials.from_authorized_user_file(
+                f"creds/{self.token_name}_token.json", self.scopes
+            )
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

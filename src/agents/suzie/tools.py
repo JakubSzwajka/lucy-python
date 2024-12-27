@@ -13,6 +13,7 @@ from langchain_core.messages import AIMessage, BaseMessage
 class ConversationDocContentUpdatePayload(BaseModel):
     content: str
 
+
 class UpdateConversationDocTool(BaseTool):
     name: str = "update_conversation_doc"
     description: str = "Update the conversation document with the latest message and context. Use this tool quite often to keep track of key takeaways from the conversation. Put your thougts and reflextions about the interaction with the user here. Treat it as your personal notebook."
@@ -42,5 +43,3 @@ def make_reflection(message: BaseMessage, state: AgentState):
 SUZIE_TOOLS = [
     UpdateConversationDocTool(),
 ]
-
-

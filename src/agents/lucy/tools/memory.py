@@ -58,6 +58,7 @@ class RecallMemoriesTool(BaseTool):
         documents = MemoryManager().recall_memories(query, user_id)
         return documents
 
+
 def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     """Load memories for the current conversation.
 
@@ -78,16 +79,18 @@ def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     if not thread_id:
         thread_id = str(uuid.uuid4())
 
-
     return {
         "recall_memories": memories,
         "messages": state["messages"],
-        "thoughts_doc": state.get("thoughts_doc", Document(
-            id=thread_id,
-            name=f"conversation_{thread_id}",
-            url="",
-            mime_type="text/markdown",
-            content="",
-        )),
+        "thoughts_doc": state.get(
+            "thoughts_doc",
+            Document(
+                id=thread_id,
+                name=f"conversation_{thread_id}",
+                url="",
+                mime_type="text/markdown",
+                content="",
+            ),
+        ),
         "thoughts": "",
     }

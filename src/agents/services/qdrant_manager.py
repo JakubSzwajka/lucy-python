@@ -28,6 +28,7 @@ class _RecallVectorStoreSingleton:
             _RecallVectorStoreSingleton._instance = (
                 QdrantVectorStore.from_existing_collection(
                     url=GlobalConfig.get_qdrant_url(),
+                    api_key=GlobalConfig.get_qdrant_api_key(),
                     collection_name=collection_name,
                     embedding=OpenAIEmbeddings(model="text-embedding-3-large"),
                 )
@@ -36,7 +37,9 @@ class _RecallVectorStoreSingleton:
 
     @staticmethod
     def _ensure_collection():
-        client = QdrantClient(url=GlobalConfig.get_qdrant_url())
+        client = QdrantClient(
+            url=GlobalConfig.get_qdrant_url(), api_key=GlobalConfig.get_qdrant_api_key()
+        )
         collection_name = "lucy"
         collection_list = client.get_collections()
         if not any(

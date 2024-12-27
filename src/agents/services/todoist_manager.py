@@ -20,4 +20,3 @@ class TodoistClient:
 
     def complete_task(self, task_id: str):
         return self.client.close_task(task_id)
-

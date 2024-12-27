@@ -1,6 +1,7 @@
 from datetime import datetime
 from dotenv import load_dotenv
 import yaml
+
 loaded = load_dotenv()
 from agents.services.qdrant_manager import MemoryManager
 

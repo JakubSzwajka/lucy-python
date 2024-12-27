@@ -1,0 +1,51 @@
+services:
+  app:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - DB_URL=postgresql://postgres:lucy@db:5432/lucy
+      - RESEND_TOKEN=${RESEND_TOKEN}
+      - TODOIST_LUCY_TOKEN=${TODOIST_LUCY_TOKEN}
+      - TODOIST_CLIENT_ID=${TODOIST_CLIENT_ID}
+      - TODOIST_CLIENT_SECRET=${TODOIST_CLIENT_SECRET}
+      - TRELLO_LUCY_TOKEN=${TRELLO_LUCY_TOKEN}
+      - TRELLO_API_KEY=${TRELLO_API_KEY}
+      - TRELLO_SECRET_KEY=${TRELLO_SECRET_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2}
+      - NOTION_API_KEY=${NOTION_API_KEY}
+      # - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - QDRANT_URL=${QDRANT_URL}
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - qdrant
+      - db
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant_service
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:z
+
+  db:
+    image: postgres:15
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=lucy
+      - POSTGRES_DB=lucy
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data:z

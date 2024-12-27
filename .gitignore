@@ -167,3 +167,7 @@ memories.yaml
 
 creds/**
 token.json
+
+.env.prod
+
+postgres_data/

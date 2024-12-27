@@ -18,7 +18,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from agents import Agents
 
-loaded = load_dotenv()
+loaded = load_dotenv('/Users/kuba.szwajka/DEV/priv/lucy-all/lucy-python/src/.env.prod')
 
 logger = logging.getLogger()
 logger.handlers.clear()

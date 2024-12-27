@@ -1,0 +1,7 @@
+.venv
+.ruff_cache
+.qdrant_storage
+.env
+.env.prod
+__pycache__
+creds

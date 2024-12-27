@@ -9,7 +9,7 @@ plot:
 	python src/plot.py
 
 compile:
-	pip-compile requirements.in
+	pip-compile requirements.in --generate-hashes --allow-unsafe
 
 install:
 	pip install pip-tools

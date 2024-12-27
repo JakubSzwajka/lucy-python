@@ -11,6 +11,8 @@ import networkx as nx
 from qdrant_client.http.models import VectorParams
 from qdrant_client.http.models import Distance
 
+from config import GlobalConfig
+
 
 class _RecallVectorStoreSingleton:
     _instance = None
@@ -25,7 +27,7 @@ class _RecallVectorStoreSingleton:
 
             _RecallVectorStoreSingleton._instance = (
                 QdrantVectorStore.from_existing_collection(
-                    url="http://localhost:6333",
+                    url=GlobalConfig.get_qdrant_url(),
                     collection_name=collection_name,
                     embedding=OpenAIEmbeddings(model="text-embedding-3-large"),
                 )
@@ -34,7 +36,7 @@ class _RecallVectorStoreSingleton:
 
     @staticmethod
     def _ensure_collection():
-        client = QdrantClient(url="http://localhost:6333")
+        client = QdrantClient(url=GlobalConfig.get_qdrant_url())
         collection_name = "lucy"
         collection_list = client.get_collections()
         if not any(

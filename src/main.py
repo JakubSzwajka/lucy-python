@@ -14,6 +14,7 @@ from config import GlobalConfig
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.checkpoint.postgres import PostgresSaver
 
 from agents import Agents
 
@@ -28,6 +29,8 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
+USER_ID = "kuba"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,14 +53,39 @@ async def root():
     return {"message": "Hello World"}
 
 
+@app.post("/ai")
+async def chat(request: Request):
+    data = await request.json()
+    message = data.get("message")
+    conversation_id = data.get("conversation_id")
+    user_id = data.get("user_id", USER_ID)
+
+    config = RunnableConfig(
+                {"configurable": {"thread_id": conversation_id, "user_id": user_id}}
+            )
+
+    if not message or not conversation_id:
+        return {"error": "No message or conversation_id provided"}
+
+    async with request.state.pool.connection() as conn:
+        checkpointer = AsyncPostgresSaver(conn=conn)
+        await checkpointer.setup()
+
+        lucy_agent = Lucy(checkpointer)
+        response = await lucy_agent.agent.ainvoke({"messages": [("user", message)]}, config=config)
+
+    response_message = response.get("messages", [])[-1]
+    return {"message": response_message.content}
+
+
 @app.post("/ai/stream")
-async def langchain(request: Request):
+async def chat_stream(request: Request):
     """
     An endpoint that demonstrates e2e async streaming from Lucy using a Postgres checkpointer.
     """
     data = await request.json()
     conversation_id = data.get("conversation_id")
-    user_id = data.get("user_id", "kuba-123")
+    user_id = data.get("user_id", USER_ID)
     messages = data.get("messages", [])
     if not messages:
         return {"error": "No messages provided"}

@@ -24,7 +24,7 @@ Example topics covered in todoist:
 
 class ListTasksFilters(BaseModel):
     filter: str = Field(
-        description="Filter for the tasks in todoist application. Can be 'overdue', 'due_today', 'today | overdue'"
+        description="Filter for the tasks in todoist application. Can be 'overdue', 'due_today', 'today | overdue'. The main and most important view is: 'due today | overdue | @fake_date'"
     )
 
 

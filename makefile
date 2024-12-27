@@ -8,11 +8,11 @@ serve:
 plot:
 	python src/plot.py
 
-
 compile:
 	pip-compile requirements.in
 
 install:
+	pip install pip-tools
 	pip-sync requirements.txt
 
 run-qdrant-local: 

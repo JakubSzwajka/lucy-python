@@ -14,9 +14,10 @@ from config import GlobalConfig
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langgraph.checkpoint.postgres import PostgresSaver
 
 from agents import Agents
+from agents.services.google_calendar_manager import GoogleCalendarManager
+from agents.services.google_drive_manager import GoogleDriveManager
 
 # loaded = load_dotenv('/Users/kuba.szwajka/DEV/priv/lucy-all/lucy-python/.env')
 loaded = load_dotenv()
@@ -52,6 +53,16 @@ app = FastAPI(lifespan=lifespan)
 async def root():
     return {"message": "Hello World"}
 
+@app.get("/calendar-login")
+async def calendar_login(request: Request):
+    manager = GoogleCalendarManager()
+    return {"url": "check logs"}
+
+
+@app.get("/drive-login")
+async def drive_login(request: Request):
+    manager = GoogleDriveManager()
+    return {"url": "check logs"}
 
 @app.post("/ai")
 async def chat(request: Request):

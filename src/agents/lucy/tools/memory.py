@@ -8,12 +8,10 @@ from agents.state import AgentState
 from agents.common import get_user_id
 from langchain.tools import BaseTool
 from agents.services.qdrant_manager import KnowledgeTriple, MemoryManager
-from langgraph.types import Command
 from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
 )
 
-from agents.lucy.document import Document
 
 
 class MessageWithMemory(BaseModel):
@@ -82,15 +80,5 @@ def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     return {
         "recall_memories": memories,
         "messages": state["messages"],
-        "thoughts_doc": state.get(
-            "thoughts_doc",
-            Document(
-                id=thread_id,
-                name=f"conversation_{thread_id}",
-                url="",
-                mime_type="text/markdown",
-                content="",
-            ),
-        ),
         "thoughts": "",
     }

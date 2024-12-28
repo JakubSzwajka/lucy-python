@@ -1,4 +1,4 @@
-from .calendar import CalendarGetUpcomingEventsTool
+from .calendar import CalendarCreateEventTool, CalendarGetUpcomingEventsTool
 from .emails import SendEmailTool
 from .drive import GetFilesTool, ListFilesTool
 from .memory import SaveMemoryTool, RecallMemoriesTool
@@ -19,4 +19,5 @@ LUCY_TOOLS = [
     ListFilesTool(),
     GetFilesTool(),
     CalendarGetUpcomingEventsTool(),
+    CalendarCreateEventTool()
 ]

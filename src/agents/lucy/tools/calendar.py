@@ -42,17 +42,32 @@ class CalendarGetUpcomingEventsTool(BaseTool):
 
 
 class TimeObject(BaseModel):
-    date_time: datetime = Field(description="The date time of the event. Time zone aware! Use ISO format.")
-    timezone: str = Field(description="The timezone of the event. By default use Europe/Warsaw.")
+    date_time: datetime = Field(
+        description="The date time of the event. Time zone aware! Use ISO format."
+    )
+    timezone: str = Field(
+        description="The timezone of the event. By default use Europe/Warsaw."
+    )
 
 
 class CalendarCreateEventPayload(BaseModel):
-    summary: str = Field(description="The title of the event. Short meaningfull but with emoji at the very beginning.")
+    summary: str = Field(
+        description="The title of the event. Short meaningfull but with emoji at the very beginning."
+    )
     start: TimeObject = Field(description="The start time of the event.")
-    end: TimeObject = Field(description="The end time of the event. Put all events by default for 1h after start time.")
+    end: TimeObject = Field(
+        description="The end time of the event. Put all events by default for 1h after start time."
+    )
     description: str = Field(description="The description of the event.")
-    location: Optional[str] = Field(description="The location of the event. Only if you know it. Otherwise leave empty.", default=None)
-    attendees: Optional[list[str]] = Field(description="The list of attendees. Only if you know it. Use only email addresses. Otherwise leave empty.", default=None)
+    location: Optional[str] = Field(
+        description="The location of the event. Only if you know it. Otherwise leave empty.",
+        default=None,
+    )
+    attendees: Optional[list[str]] = Field(
+        description="The list of attendees. Only if you know it. Use only email addresses. Otherwise leave empty.",
+        default=None,
+    )
+
 
 class CalendarCreateEventTool(BaseTool):
     name: str = "calendar_create_event"
@@ -78,5 +93,5 @@ class CalendarCreateEventTool(BaseTool):
             end_time_zone=end.timezone,
             description=description,
             location=location,
-            attendees=attendees
-            )
+            attendees=attendees,
+        )

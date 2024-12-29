@@ -1,3 +1,4 @@
+from .web_search import WebSearchTool
 from .calendar import CalendarCreateEventTool, CalendarGetUpcomingEventsTool
 from .emails import SendEmailTool
 from .drive import GetFilesTool, ListFilesTool
@@ -19,5 +20,6 @@ LUCY_TOOLS = [
     ListFilesTool(),
     GetFilesTool(),
     CalendarGetUpcomingEventsTool(),
-    CalendarCreateEventTool()
+    CalendarCreateEventTool(),
+    WebSearchTool(),
 ]

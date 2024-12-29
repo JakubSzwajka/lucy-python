@@ -16,7 +16,7 @@ from langchain_core.documents import Document as LangchainDocument
 
 from langchain_google_community import GoogleDriveLoader
 
-from agents.lucy.document import Document
+from agents.document import Document
 
 
 class MarkdownLoaderFromString(BaseLoader):

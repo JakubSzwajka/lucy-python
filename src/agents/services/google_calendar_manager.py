@@ -5,7 +5,10 @@ from googleapiclient.discovery import build
 from agents.services.google_scopes import GoogleManagerBase
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.events"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/calendar.events",
+]
 
 
 class Event(TypedDict):
@@ -69,29 +72,31 @@ class GoogleCalendarManager(GoogleManagerBase):
         return final_events
 
     def create_event(
-            self,
-            summary: str,
-            start_date_time: datetime,
-            start_time_zone: str,
-            end_date_time: datetime,
-            end_time_zone: str,
-            description: str,
-            location: Optional[str],
-            attendees: Optional[list[str]]):
+        self,
+        summary: str,
+        start_date_time: datetime,
+        start_time_zone: str,
+        end_date_time: datetime,
+        end_time_zone: str,
+        description: str,
+        location: Optional[str],
+        attendees: Optional[list[str]],
+    ):
         event = {
             "summary": summary,
             "location": location,
-            "attendees": [{
-                "email": attendee
-            } for attendee in attendees] if attendees else None,
+            "attendees": [{"email": attendee} for attendee in attendees]
+            if attendees
+            else None,
             "start": {
                 "dateTime": start_date_time.isoformat(),
-                "timeZone": start_time_zone
+                "timeZone": start_time_zone,
             },
-            "end": {
-                "dateTime": end_date_time.isoformat(),
-                "timeZone": end_time_zone
-            },
+            "end": {"dateTime": end_date_time.isoformat(), "timeZone": end_time_zone},
             "description": description,
         }
-        return self.service.events().insert(calendarId="szwajkajakub@gmail.com", body=event).execute()
+        return (
+            self.service.events()
+            .insert(calendarId="szwajkajakub@gmail.com", body=event)
+            .execute()
+        )

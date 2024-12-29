@@ -33,6 +33,7 @@ logger.addHandler(handler)
 
 USER_ID = "kuba"
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connection_kwargs = {
@@ -53,6 +54,7 @@ app = FastAPI(lifespan=lifespan)
 async def root():
     return {"message": "Hello World"}
 
+
 @app.get("/calendar-login")
 async def calendar_login(request: Request):
     manager = GoogleCalendarManager()
@@ -64,6 +66,7 @@ async def drive_login(request: Request):
     manager = GoogleDriveManager()
     return {"url": "check logs"}
 
+
 @app.post("/ai")
 async def chat(request: Request):
     data = await request.json()
@@ -72,8 +75,8 @@ async def chat(request: Request):
     user_id = data.get("user_id", USER_ID)
 
     config = RunnableConfig(
-                {"configurable": {"thread_id": conversation_id, "user_id": user_id}}
-            )
+        {"configurable": {"thread_id": conversation_id, "user_id": user_id}}
+    )
 
     if not message or not conversation_id:
         return {"error": "No message or conversation_id provided"}
@@ -83,7 +86,9 @@ async def chat(request: Request):
         await checkpointer.setup()
 
         lucy_agent = Lucy(checkpointer)
-        response = await lucy_agent.agent.ainvoke({"messages": [("user", message)]}, config=config)
+        response = await lucy_agent.agent.ainvoke(
+            {"messages": [("user", message)]}, config=config
+        )
 
     response_message = response.get("messages", [])[-1]
     return {"message": response_message.content}

@@ -4,13 +4,13 @@ from langgraph.graph import START, StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.prebuilt import ToolNode
 from agents.state import AgentState
-from agents.lucy.prompts import MASTER_PROMPT
+from agents.lucy.prompts.master_prompt import MASTER_PROMPT
+from agents.lucy.prompts.reflection_prompt import REFLECTION_MASTER_PROMPT
 from agents.lucy.tools import LUCY_TOOLS
 from agents.lucy.tools.memory import load_memories
 from config import GlobalConfig
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from agents.common import get_tool_router
-from agents.suzie.prompt import REFLECTION_MASTER_PROMPT
 
 from agents import Agents, ToolNodes
 

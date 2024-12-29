@@ -12,6 +12,7 @@ from langchain.callbacks.manager import (
     CallbackManagerForToolRun,
 )
 
+from agents.services.airtable_manager import AirtableManager
 
 
 class MessageWithMemory(BaseModel):
@@ -39,6 +40,7 @@ class SaveMemoryTool(BaseTool):
     ) -> MessageWithMemory:
         print("NEW MEMORY", memories)
         MemoryManager().save_memories(memories, context, get_user_id(config))
+        AirtableManager().add_to_memories(memories, context)
         return MessageWithMemory(message=message, context=context, memories=memories)
 
 

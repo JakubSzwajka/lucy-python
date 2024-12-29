@@ -1,3 +1,4 @@
+import asyncio
 from firecrawl import FirecrawlApp
 from typing import List
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
@@ -13,14 +14,14 @@ class FireCrawlManager:
         self.client = FirecrawlApp(api_key=GlobalConfig.get_firecrawl_api_key())
         self.logger = get_logger(self.__class__.__name__)
 
-    def load_page(self, url: str) -> List[Document]:
+    async def _load_page(self, url: str) -> List[Document]:
         loader = FireCrawlLoader(
             api_key=GlobalConfig.get_firecrawl_api_key(), url=url, mode="scrape"
         )
         docs = loader.load()
         return docs
 
-    def search_web(self, query: str) -> List[Document]:
+    async def search_web_async(self, query: str) -> List[Document]:
         self.logger.info("Searching the web for: %s", query)
         url = "https://api.firecrawl.dev/v0/search"
         search_results = []
@@ -35,9 +36,17 @@ class FireCrawlManager:
         )
         response_json = response.json()
         pages = response_json['data']
+        tasks = []
+
         for page in pages:
             self.logger.info("Loading page: %s", page['url'])
-            docs = self.load_page(page['url'])
+            tasks.append(self._load_page(page['url']))
+
+        results = await asyncio.gather(*tasks)
+        for docs in results:
             search_results.extend(docs)
 
         return search_results
+
+    def search_web(self, query: str) -> List[Document]:
+        return asyncio.run(self.search_web_async(query))

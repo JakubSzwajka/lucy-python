@@ -165,8 +165,8 @@ async def chat_stream(request: Request):
                             ],
                         }
                         yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
-                elif token_type == "values":
-                    logger.info("Value: %s", token)
+                # elif token_type == "values":
+                #     logger.info("Value: %s", token)
 
 
         return StreamingResponse(stream_chat(), media_type="text/event-stream")

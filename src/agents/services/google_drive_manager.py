@@ -5,12 +5,8 @@ from googleapiclient.discovery import build
 from agents.services.google_scopes import GoogleManagerBase
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
+from agents.logger import get_logger
 
-
-# class StringFileUpload(MediaFileUpload):
-#     def __init__(self, filename, mimetype=None, chunksize=DEFAULT_CHUNK_SIZE, resumable=False):
-#         super().__init__(filename, mimetype, chunksize, resumable)
-#         self.content = content
 
 
 class Document(TypedDict):
@@ -31,6 +27,7 @@ class GoogleDriveManager(GoogleManagerBase):
     def __init__(self):
         super().__init__("drive", SCOPES)
         self.service = build("drive", "v3", credentials=self.creds)
+        self.logger = get_logger(self.__class__.__name__)
 
     def list_files(self):
         # Call the Drive v3 API

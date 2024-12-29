@@ -1,6 +1,7 @@
 import os
 from typing import Optional, TypedDict, List
-from trello import TrelloClient, Board, Card, Checklist
+from trello import TrelloClient
+from agents.logger import get_logger
 
 # The "slug"/ID of the workspace (organization) you want to get boards from
 ORGANIZATION_NAME_OR_ID = "kuba_szwajka"
@@ -48,11 +49,13 @@ class TrelloManager:
             api_secret=os.getenv("TRELLO_SECRET_KEY"),
             token=os.getenv("TRELLO_LUCY_TOKEN"),
         )
+        self.logger = get_logger(self.__class__.__name__)
 
     def list_boards_in_workspace(self) -> List[TrelloBoard]:
         """
         Returns all boards in the specified workspace.
         """
+        self.logger.info("Listing boards in workspace")
         organization = self.client.get_organization(ORGANIZATION_NAME_OR_ID)
         boards = organization.all_boards()
         return [
@@ -70,6 +73,7 @@ class TrelloManager:
         """
         Returns a board by its ID.
         """
+        self.logger.info("Getting board: %s", board_id)
         board = self.client.get_board(board_id)
         return TrelloBoard(
             id=board.id,
@@ -121,6 +125,7 @@ class TrelloManager:
         :param desc: Optional description for the card.
         :return: The newly created Card object.
         """
+        self.logger.info("Creating card in list: %s", list_id)
         trello_list = self.client.get_list(list_id)
         card = trello_list.add_card(name=name, desc=desc, due=due or "")
         return TrelloCard(
@@ -156,6 +161,7 @@ class TrelloManager:
         new_list_id: Optional[str] = None,
         checklist_items: Optional[List[TrelloCheckListItem]] = None,
     ) -> TrelloCard:
+        self.logger.info("Updating card: %s", card_id)
         card = self.client.get_card(card_id)
         if name:
             card.set_name(name)

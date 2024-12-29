@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from qdrant_client.http.models import VectorParams
 from qdrant_client.http.models import Distance
+from agents.logger import get_logger
 
 from config import GlobalConfig
 
@@ -71,12 +72,14 @@ Example: "Kuba" and "Dominika" are two different subjects.
 class MemoryManager:
     def __init__(self):
         self.vectorstore = _RecallVectorStoreSingleton.get_instance()
+        self.logger = get_logger(self.__class__.__name__)
 
     def save_memories(
         self, memories: List[KnowledgeTriple], context: str, user_id: str
     ):
         documents = []
         for memory in memories:
+            self.logger.info("Saving memory: %s", memory)
             dump = memory.model_dump(mode="json")
             dump["context"] = context
             serialized = " ".join(dump.values())  # type: ignore
@@ -94,10 +97,12 @@ class MemoryManager:
         self.vectorstore.add_documents(documents)
 
     def recall_memories(self, query: str, user_id: str):
+        self.logger.info("Recalling memories for query: %s", query)
         documents = self.vectorstore.similarity_search(query, k=10)
         return [document.metadata for document in documents]
 
     def plot_memories(self):
+        self.logger.info("Plotting memories")
         records = self.vectorstore.similarity_search("", k=100)
 
         # Plot graph
@@ -128,6 +133,7 @@ class MemoryManager:
         return "Memory graph plotted"
 
     def dump_memories(self):
+        self.logger.info("Dumping memories")
         points = self.vectorstore.client.scroll(
             collection_name="lucy",
             limit=1000,

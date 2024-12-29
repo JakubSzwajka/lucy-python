@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, TypedDict
 from googleapiclient.discovery import build
+from agents.logger import get_logger
 
 from agents.services.google_scopes import GoogleManagerBase
 
@@ -24,8 +25,10 @@ class GoogleCalendarManager(GoogleManagerBase):
     def __init__(self):
         super().__init__("calendar", SCOPES)
         self.service = build("calendar", "v3", credentials=self.creds)
+        self.logger = get_logger(self.__class__.__name__)
 
     def get_upcoming_events(self, days: int):
+        self.logger.info("Getting upcoming events for %d days", days)
         time_min = datetime.now().isoformat() + "Z"
         time_max = (datetime.now() + timedelta(days=days)).isoformat() + "Z"
 
@@ -95,6 +98,7 @@ class GoogleCalendarManager(GoogleManagerBase):
             "end": {"dateTime": end_date_time.isoformat(), "timeZone": end_time_zone},
             "description": description,
         }
+        self.logger.info("Creating event: %s", event)
         return (
             self.service.events()
             .insert(calendarId="szwajkajakub@gmail.com", body=event)

@@ -759,6 +759,10 @@ idna==3.10 \
     #   langfuse
     #   requests
     #   yarl
+inflection==0.5.1 \
+    --hash=sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417 \
+    --hash=sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2
+    # via pyairtable
 jiter==0.8.2 \
     --hash=sha256:025337859077b41548bdcbabe38698bcd93cfe10b06ff66617a48ff92c9aec60 \
     --hash=sha256:03c9df035d4f8d647f8c210ddc2ae0728387275340668fb30d2421e17d9a0841 \
@@ -1583,6 +1587,10 @@ py-trello==0.20.1 \
     --hash=sha256:8388552f166e3f3a820345ba2cc9e070603f0495396f05517b9ed6d533ea48e0 \
     --hash=sha256:a5b5a915fff2752258fb8a8dfe1c7ed32e78aabbeaea1bfcc1ea926b9c54338f
     # via -r requirements.in
+pyairtable==3.0.1 \
+    --hash=sha256:07295d82be1adfd3c00e21c640e7c79d0819846daf0549bc982736cc07e85d8e \
+    --hash=sha256:7012a2403ba333db9d76d93453ade8762b3d12818d11cde670fa6cb697f42daf
+    # via -r requirements.in
 pyasn1==0.6.1 \
     --hash=sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629 \
     --hash=sha256:6f580d2bdd84365380830acf45550f2511469f673cb4a5ae3857a3170128b034
@@ -1607,6 +1615,7 @@ pydantic==2.10.3 \
     #   langfuse
     #   langsmith
     #   openai
+    #   pyairtable
     #   pydantic-settings
     #   qdrant-client
 pydantic-core==2.27.1 \
@@ -1907,6 +1916,7 @@ requests==2.32.3 \
     #   langfuse
     #   langsmith
     #   py-trello
+    #   pyairtable
     #   requests-oauthlib
     #   requests-toolbelt
     #   resend
@@ -2085,6 +2095,7 @@ typing-extensions==4.12.2 \
     #   openai
     #   psycopg
     #   psycopg-pool
+    #   pyairtable
     #   pydantic
     #   pydantic-core
     #   resend
@@ -2102,6 +2113,7 @@ urllib3==2.2.3 \
     --hash=sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac \
     --hash=sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9
     # via
+    #   pyairtable
     #   qdrant-client
     #   requests
 uvicorn==0.32.1 \

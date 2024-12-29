@@ -1,17 +1,17 @@
-import uuid
 from firecrawl import FirecrawlApp
 from typing import List
 from langchain_community.document_loaders.firecrawl import FireCrawlLoader
 import requests
 
 from config import GlobalConfig
-# from agents.document import Document
 from langchain_core.documents import Document
+from agents.logger import get_logger
 
 
 class FireCrawlManager:
     def __init__(self):
         self.client = FirecrawlApp(api_key=GlobalConfig.get_firecrawl_api_key())
+        self.logger = get_logger(self.__class__.__name__)
 
     def load_page(self, url: str) -> List[Document]:
         loader = FireCrawlLoader(
@@ -21,7 +21,7 @@ class FireCrawlManager:
         return docs
 
     def search_web(self, query: str) -> List[Document]:
-        print('[TOOL:WEB_SEARCH] Searching the web for:', query)
+        self.logger.info("Searching the web for: %s", query)
         url = "https://api.firecrawl.dev/v0/search"
         search_results = []
         response = requests.post(
@@ -36,7 +36,7 @@ class FireCrawlManager:
         response_json = response.json()
         pages = response_json['data']
         for page in pages:
-            print('[TOOL:WEB_SEARCH] Loading page:', page['url'])
+            self.logger.info("Loading page: %s", page['url'])
             docs = self.load_page(page['url'])
             search_results.extend(docs)
 

@@ -18,6 +18,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from agents import Agents
 from agents.services.google_calendar_manager import GoogleCalendarManager
 from agents.services.google_drive_manager import GoogleDriveManager
+from agents.logger import get_logger
 
 # loaded = load_dotenv('/Users/kuba.szwajka/DEV/priv/lucy-all/lucy-python/.env')
 loaded = load_dotenv()
@@ -32,6 +33,8 @@ logger.addHandler(handler)
 
 
 USER_ID = "kuba"
+
+logger = get_logger("MAIN")
 
 
 @asynccontextmanager
@@ -131,7 +134,7 @@ async def chat_stream(request: Request):
             async for token_type, token in lucy_agent.agent.astream(
                 input={"messages": messages},
                 config=config,
-                stream_mode=["messages"],
+                stream_mode=["messages", "values"],
             ):
                 # https://langchain-ai.github.io/langgraph/how-tos/streaming-from-final-node/#filter-on-event-metadata
                 if token_type == "messages":
@@ -162,6 +165,9 @@ async def chat_stream(request: Request):
                             ],
                         }
                         yield f"event: chat.completion.chunk\ndata: {json.dumps(data)}\n\n"
+                elif token_type == "values":
+                    logger.info("Value: %s", token)
+
 
         return StreamingResponse(stream_chat(), media_type="text/event-stream")
 

@@ -42,3 +42,4 @@ resend==2.5.1
 
 py-trello==0.20.1
 firecrawl-py==1.7.0
+pyairtable==3.0.1

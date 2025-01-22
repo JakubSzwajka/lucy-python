@@ -69,10 +69,14 @@ def load_memories(state: AgentState, config: RunnableConfig) -> AgentState:
     Returns:
         State: The updated state with loaded memories.
     """
-    tokenizer = tiktoken.encoding_for_model("gpt-4o")
-    convo_str = get_buffer_string(state["messages"])
-    convo_str = tokenizer.decode(tokenizer.encode(convo_str)[:2048])
-    memories = MemoryManager().recall_memories(convo_str, get_user_id(config))
+    try:
+        tokenizer = tiktoken.encoding_for_model("gpt-4o")
+        convo_str = get_buffer_string(state["messages"])
+        convo_str = tokenizer.decode(tokenizer.encode(convo_str)[:2048])
+        memories = MemoryManager().recall_memories(convo_str, get_user_id(config))
+    except Exception as e:
+        print(f"Error loading memories: {e}")
+        memories = []
 
     # ----------- conversation doc ------------
     thread_id = config.get("metadata", {}).get("thread_id", None)

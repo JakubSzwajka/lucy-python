@@ -73,6 +73,9 @@ async def drive_login(request: Request):
 @app.post("/ai")
 async def chat(request: Request):
     data = await request.json()
+    # print('---------------------------')
+    # print(data)
+    # print('---------------------------')
     message = data.get("message")
     conversation_id = data.get("conversation_id")
     user_id = data.get("user_id", USER_ID)
